@@ -55,7 +55,7 @@ class SignInFragment : Fragment() {
 
 
             if(email.isNotEmpty() && pass.isNotEmpty()){
-                binding.progressBar.visibility = View.VISIBLE
+
 
 
 

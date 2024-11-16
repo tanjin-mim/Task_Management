@@ -1,12 +1,14 @@
 package com.example.taskmanagement.fragments
 
 import android.app.ProgressDialog.show
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Adapter
+import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.NavController
@@ -18,7 +20,9 @@ import com.example.taskmanagement.utils.TaskManagementAdapter
 import com.example.taskmanagement.utils.TaskManagementData
 import com.google.android.gms.tasks.Tasks
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -36,6 +40,7 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
     private  var popUpFragment: AddTaskManagementPopUpFragment ?= null
     private lateinit var adapter: TaskManagementAdapter
     private lateinit var mList: MutableList<TaskManagementData>
+    private lateinit var btnLogOut : Button
 
 
     override fun onCreateView(
@@ -78,12 +83,13 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
                 AddTaskManagementPopUpFragment.TAG
 
             )
-
-
-
-
-
         }
+
+        binding.logOutBtn.setOnClickListener {
+            logoutUser()
+        }
+
+
     }
 private fun init(view : View){
     navController = Navigation.findNavController(view)
@@ -180,6 +186,15 @@ private fun init(view : View){
         popUpFragment!!.show(childFragmentManager,AddTaskManagementPopUpFragment.TAG)
 
     }
+
+    private fun logoutUser() {
+        auth.signOut() // Firebase sign out
+        Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+        // Navigate to Sign In Fragment
+        navController.navigate(R.id.action_homeFragment_to_signInFragment)
+    }
+
 
 }
 

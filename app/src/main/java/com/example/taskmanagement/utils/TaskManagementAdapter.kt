@@ -3,7 +3,7 @@ package com.example.taskmanagement.utils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.taskmanagement.databinding.EachTaskmanegementItemBinding
+import com.example.taskmanagement.databinding.ItemTaskManagementBinding
 
 class TaskManagementAdapter(private val list:MutableList<TaskManagementData>):
 RecyclerView.Adapter<TaskManagementAdapter.TaskManagementViewHolder>(){
@@ -16,10 +16,10 @@ RecyclerView.Adapter<TaskManagementAdapter.TaskManagementViewHolder>(){
 
 
 
-    inner class TaskManagementViewHolder(val binding:EachTaskmanegementItemBinding): RecyclerView.ViewHolder(binding.root)
+    inner class TaskManagementViewHolder(val binding:ItemTaskManagementBinding): RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskManagementViewHolder {
-        val binding = EachTaskmanegementItemBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        val binding = ItemTaskManagementBinding.inflate(LayoutInflater.from(parent.context),parent,false)
         return TaskManagementViewHolder(binding)
     }
     override fun onBindViewHolder(holder: TaskManagementViewHolder, position: Int)
@@ -27,6 +27,9 @@ RecyclerView.Adapter<TaskManagementAdapter.TaskManagementViewHolder>(){
         with(holder){
             with(list[position]){
                 binding.taskManagementTask.text = this.task
+                binding.endDateTime.text = this.endDateTime
+                binding.taskStatus.text = this.isCompleted.toString()
+
 
                 binding.deleteTask.setOnClickListener {
                     listener?.onDeleteTaskBtnClicked(this)

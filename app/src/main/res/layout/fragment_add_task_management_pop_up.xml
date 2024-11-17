@@ -56,15 +56,15 @@
         <!-- Date & Time Picker Button -->
         <Button
             android:id="@+id/dateTimePickerBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="280dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/secondary_color"
             android:text="Select Date and Time"
             android:textColor="@color/black"
-            android:backgroundTint="@color/secondary_color"
-            app:layout_constraintTop_toBottomOf="@id/taskInputLayout"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/taskInputLayout" />
 
         <!-- Display Selected Date & Time -->
         <TextView

@@ -22,26 +22,53 @@ RecyclerView.Adapter<TaskManagementAdapter.TaskManagementViewHolder>(){
         val binding = ItemTaskManagementBinding.inflate(LayoutInflater.from(parent.context),parent,false)
         return TaskManagementViewHolder(binding)
     }
-    override fun onBindViewHolder(holder: TaskManagementViewHolder, position: Int)
-{
-        with(holder){
-            with(list[position]){
+
+
+
+
+//    override fun onBindViewHolder(holder: TaskManagementViewHolder, position: Int)
+//      {
+//        with(holder){
+//            with(list[position]){
+//                binding.taskManagementTask.text = this.task
+//                binding.endDateTime.text = this.endDateTime
+//                binding.taskStatus.text = this.isCompleted.toString()
+//
+//
+//                binding.deleteTask.setOnClickListener {
+//                    listener?.onDeleteTaskBtnClicked(this)
+//
+//                }
+//                binding.editTask.setOnClickListener {
+//                    listener?.onEditTaskBtnClicked(this)
+//
+//                }
+//            }
+//        }
+//    }
+
+    override fun onBindViewHolder(holder: TaskManagementViewHolder, position: Int) {
+        with(holder) {
+            with(list[position]) {
                 binding.taskManagementTask.text = this.task
                 binding.endDateTime.text = this.endDateTime
-                binding.taskStatus.text = this.isCompleted.toString()
+                binding.taskStatus.text = this.getTaskStatus() // Display the task status
 
-
+                // Delete button click listener
                 binding.deleteTask.setOnClickListener {
                     listener?.onDeleteTaskBtnClicked(this)
-
                 }
+
+                // Edit button click listener
                 binding.editTask.setOnClickListener {
                     listener?.onEditTaskBtnClicked(this)
-
                 }
             }
         }
     }
+
+
+
 
     override fun getItemCount(): Int {
         return list.size

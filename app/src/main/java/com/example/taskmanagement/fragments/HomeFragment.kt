@@ -18,6 +18,8 @@ import com.example.taskmanagement.utils.TaskManagementData
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnClickListener,
     TaskManagementAdapter.TaskManagementAdapterClickInterface {
@@ -183,20 +185,36 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
     }
 
 
-
     override fun onTaskCompletionStatusChanged(taskManagementData: TaskManagementData) {
-        val updatedStatus = !taskManagementData.isCompleted // Toggle the current status
-        databaseRef.child(taskManagementData.taskId).child("isCompleted").setValue(updatedStatus)
+        val updatedStatus = !taskManagementData.isCompleted // Toggle completion status
+        val currentDateTime = System.currentTimeMillis()
+        val taskEndDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            .parse(taskManagementData.endDateTime)?.time ?: 0L
+
+        val newStatus = when {
+            updatedStatus -> "Completed"
+            !updatedStatus && taskEndDateTime < currentDateTime -> "Missed"
+            else -> "Pending"
+        }
+
+        val updatedValues = mapOf(
+            "isCompleted" to updatedStatus,
+            "taskStatus" to newStatus
+        )
+
+        databaseRef.child(taskManagementData.taskId).updateChildren(updatedValues)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    taskManagementData.isCompleted = updatedStatus // Update the local data object
-                    adapter.notifyDataSetChanged() // Refresh the adapter
-                    Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
+                    taskManagementData.isCompleted = updatedStatus // Update local object
+                    taskManagementData.taskStatus = newStatus
+                    adapter.notifyDataSetChanged() // Refresh adapter
+                    Toast.makeText(context, "Task status updated", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, task.exception?.message, Toast.LENGTH_SHORT).show()
                 }
             }
     }
+
 
 
 

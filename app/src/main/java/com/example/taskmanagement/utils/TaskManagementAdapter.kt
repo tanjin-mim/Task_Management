@@ -27,27 +27,25 @@ class TaskManagementAdapter(private val list: MutableList<TaskManagementData>) :
             with(list[position]) {
                 binding.taskManagementTask.text = this.task
                 binding.endDateTime.text = this.endDateTime
-                binding.taskStatus.text = this.getTaskStatus() // Display the task status
+                binding.taskStatus.text = this.taskStatus // Bind taskStatus directly
 
-                // Delete button click listener
-                binding.deleteTask.setOnClickListener {
-                    listener?.onDeleteTaskBtnClicked(this)
-                }
-
-                // Edit button click listener
-                binding.editTask.setOnClickListener {
-                    listener?.onEditTaskBtnClicked(this)
-                }
-
-                binding.checkboxCompleted.isChecked = this.isCompleted // Set the checkbox state
+                binding.checkboxCompleted.isChecked = this.isCompleted // Set checkbox state
 
                 binding.checkboxCompleted.setOnClickListener {
                     listener?.onTaskCompletionStatusChanged(this)
                 }
 
+                binding.deleteTask.setOnClickListener {
+                    listener?.onDeleteTaskBtnClicked(this)
+                }
+
+                binding.editTask.setOnClickListener {
+                    listener?.onEditTaskBtnClicked(this)
+                }
             }
         }
     }
+
 
 
     override fun getItemCount(): Int = list.size

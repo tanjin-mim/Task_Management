@@ -13,6 +13,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.taskmanagement.R
 import com.example.taskmanagement.databinding.FragmentHomeBinding
+import com.example.taskmanagement.notifications.NotificationWorker
 import com.example.taskmanagement.utils.TaskManagementAdapter
 import com.example.taskmanagement.utils.TaskManagementData
 import com.google.android.material.textfield.TextInputEditText
@@ -89,6 +90,7 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
                     val taskData = taskSnapshot.getValue(TaskManagementData::class.java)
                     if (taskData != null) {
                         mList.add(taskData)
+                        scheduleNotification(taskData)
                     }
                 }
                 adapter.notifyDataSetChanged()
@@ -185,38 +187,107 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
     }
 
 
+//   override fun onTaskCompletionStatusChanged(taskManagementData: TaskManagementData) {
+//
+//     val updatedStatus = !taskManagementData.isCompleted // Toggle completion status
+//        val currentDateTime = System.currentTimeMillis()
+//        val taskEndDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+//            .parse(taskManagementData.endDateTime)?.time ?: 0L
+//
+//        val newStatus = when {
+//            updatedStatus -> "Completed"
+//            !updatedStatus && taskEndDateTime < currentDateTime -> "Missed"
+//            else -> "Pending"
+//        }
+//
+//        val updatedValues = mapOf(
+//            "isCompleted" to updatedStatus,
+//            "taskStatus" to newStatus
+//        )
+//
+//        databaseRef.child(taskManagementData.taskId).updateChildren(updatedValues)
+//            .addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    taskManagementData.isCompleted = updatedStatus // Update local object
+//                    taskManagementData.taskStatus = newStatus
+//                    adapter.notifyDataSetChanged() // Refresh adapter
+//                    Toast.makeText(context, "Task status updated", Toast.LENGTH_SHORT).show()
+//                } else {
+//                    Toast.makeText(context, task.exception?.message, Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//    }
+
+
+
     override fun onTaskCompletionStatusChanged(taskManagementData: TaskManagementData) {
-        val updatedStatus = !taskManagementData.isCompleted // Toggle completion status
+        val updatedIsCompleted = !taskManagementData.isCompleted // Toggle completion status
         val currentDateTime = System.currentTimeMillis()
+        val isMissedText = taskManagementData.isMissed
         val taskEndDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             .parse(taskManagementData.endDateTime)?.time ?: 0L
 
-        val newStatus = when {
-            updatedStatus -> "Completed"
-            !updatedStatus && taskEndDateTime < currentDateTime -> "Missed"
-            else -> "Pending"
+        // Determine the new taskStatus and isMissed value
+        val newStatus: String
+        val newIsMissed: Boolean
+
+        if (updatedIsCompleted) {
+            newStatus = "Completed"
+            newIsMissed = false
+        } else if (taskEndDateTime < currentDateTime && isMissedText == true) {
+            newStatus = "Missed"
+            newIsMissed = true
+        } else {
+            newStatus = "Pending"
+            newIsMissed = false
         }
 
+        // Prepare updated values
         val updatedValues = mapOf(
-            "isCompleted" to updatedStatus,
+            "isCompleted" to updatedIsCompleted,
+            "isMissed" to newIsMissed,
             "taskStatus" to newStatus
         )
 
+        // Update Firebase and local data
         databaseRef.child(taskManagementData.taskId).updateChildren(updatedValues)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    taskManagementData.isCompleted = updatedStatus // Update local object
+                    taskManagementData.isCompleted = updatedIsCompleted
+                    taskManagementData.isMissed = newIsMissed
                     taskManagementData.taskStatus = newStatus
-                    adapter.notifyDataSetChanged() // Refresh adapter
+                    adapter.notifyDataSetChanged() // Refresh the UI
                     Toast.makeText(context, "Task status updated", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, task.exception?.message, Toast.LENGTH_SHORT).show()
                 }
             }
     }
+    private fun scheduleNotification(task: TaskManagementData) {
+        val currentTime = System.currentTimeMillis()
+        val taskEndTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            .parse(task.endDateTime)?.time ?: return
 
+        val notificationTime = taskEndTime - 1 * 60 * 1000 // 10 minutes before endDateTime
 
+        if (notificationTime > currentTime) {
+            val delay = notificationTime - currentTime
 
+            val data = androidx.work.Data.Builder()
+                .putString("taskId", task.taskId)
+                .putString("taskTitle", task.task)
+                .putString("endDateTime", task.endDateTime)
+                .build()
+
+            val notificationWorkRequest = androidx.work.OneTimeWorkRequestBuilder<NotificationWorker>()
+                .setInitialDelay(delay, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .setInputData(data)
+                .build()
+
+            androidx.work.WorkManager.getInstance(requireContext())
+                .enqueue(notificationWorkRequest)
+        }
+    }
 
 
 

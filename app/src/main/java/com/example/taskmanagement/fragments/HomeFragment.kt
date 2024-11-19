@@ -110,7 +110,7 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
         val taskData = TaskManagementData(
             taskId = taskId,
             task = taskManagement,
-            endDateTime =  endDateTime,
+            endDateTime = endDateTime,
             isCompleted = false,
             isMissed = false
         )
@@ -128,7 +128,6 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
     }
 
 
-
     override fun onUpdateTask(
         taskManagementData: TaskManagementData,
         taskManagementEt: TextInputEditText
@@ -140,15 +139,16 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
             "isMissed" to taskManagementData.isMissed
         )
 
-        databaseRef.child(taskManagementData.taskId).updateChildren(updatedTask).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, task.exception?.message, Toast.LENGTH_SHORT).show()
+        databaseRef.child(taskManagementData.taskId).updateChildren(updatedTask)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, task.exception?.message, Toast.LENGTH_SHORT).show()
+                }
+                taskManagementEt.text = null
+                popUpFragment?.dismiss()
             }
-            taskManagementEt.text = null
-            popUpFragment?.dismiss()
-        }
     }
 
     override fun onDeleteTaskBtnClicked(taskManagementData: TaskManagementData) {
@@ -181,4 +181,28 @@ class HomeFragment : Fragment(), AddTaskManagementPopUpFragment.DialogNextBtnCli
         Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
         navController.navigate(R.id.action_homeFragment_to_signInFragment)
     }
+
+
+
+    override fun onTaskCompletionStatusChanged(taskManagementData: TaskManagementData) {
+        val updatedStatus = !taskManagementData.isCompleted // Toggle the current status
+        databaseRef.child(taskManagementData.taskId).child("isCompleted").setValue(updatedStatus)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    taskManagementData.isCompleted = updatedStatus // Update the local data object
+                    adapter.notifyDataSetChanged() // Refresh the adapter
+                    Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, task.exception?.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+
+
+
+
+
+
+
 }

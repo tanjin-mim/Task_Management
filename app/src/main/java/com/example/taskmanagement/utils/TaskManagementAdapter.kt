@@ -5,47 +5,22 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taskmanagement.databinding.ItemTaskManagementBinding
 
-class TaskManagementAdapter(private val list:MutableList<TaskManagementData>):
-RecyclerView.Adapter<TaskManagementAdapter.TaskManagementViewHolder>(){
+class TaskManagementAdapter(private val list: MutableList<TaskManagementData>) :
+    RecyclerView.Adapter<TaskManagementAdapter.TaskManagementViewHolder>() {
 
-    private var listener:TaskManagementAdapterClickInterface? = null
-    fun setListener (listener:TaskManagementAdapterClickInterface){
+    private var listener: TaskManagementAdapterClickInterface? = null
+
+    fun setListener(listener: TaskManagementAdapterClickInterface) {
         this.listener = listener
     }
 
-
-
-
-    inner class TaskManagementViewHolder(val binding:ItemTaskManagementBinding): RecyclerView.ViewHolder(binding.root)
+    inner class TaskManagementViewHolder(val binding: ItemTaskManagementBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskManagementViewHolder {
-        val binding = ItemTaskManagementBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        val binding = ItemTaskManagementBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TaskManagementViewHolder(binding)
     }
-
-
-
-
-//    override fun onBindViewHolder(holder: TaskManagementViewHolder, position: Int)
-//      {
-//        with(holder){
-//            with(list[position]){
-//                binding.taskManagementTask.text = this.task
-//                binding.endDateTime.text = this.endDateTime
-//                binding.taskStatus.text = this.isCompleted.toString()
-//
-//
-//                binding.deleteTask.setOnClickListener {
-//                    listener?.onDeleteTaskBtnClicked(this)
-//
-//                }
-//                binding.editTask.setOnClickListener {
-//                    listener?.onEditTaskBtnClicked(this)
-//
-//                }
-//            }
-//        }
-//    }
 
     override fun onBindViewHolder(holder: TaskManagementViewHolder, position: Int) {
         with(holder) {
@@ -63,19 +38,23 @@ RecyclerView.Adapter<TaskManagementAdapter.TaskManagementViewHolder>(){
                 binding.editTask.setOnClickListener {
                     listener?.onEditTaskBtnClicked(this)
                 }
+
+                binding.checkboxCompleted.isChecked = this.isCompleted // Set the checkbox state
+
+                binding.checkboxCompleted.setOnClickListener {
+                    listener?.onTaskCompletionStatusChanged(this)
+                }
+
             }
         }
     }
 
 
+    override fun getItemCount(): Int = list.size
 
-
-    override fun getItemCount(): Int {
-        return list.size
+    interface TaskManagementAdapterClickInterface {
+        fun onDeleteTaskBtnClicked(taskManagementData: TaskManagementData)
+        fun onEditTaskBtnClicked(taskManagementData: TaskManagementData)
+        fun onTaskCompletionStatusChanged(taskManagementData: TaskManagementData)
     }
-interface TaskManagementAdapterClickInterface{
-    fun onDeleteTaskBtnClicked(taskManagementData: TaskManagementData )
-    fun onEditTaskBtnClicked(taskManagementData: TaskManagementData)
-}
-
 }

@@ -76,11 +76,6 @@
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
-
-
-
-
-
             <CheckBox
                 android:id="@+id/checkboxCompleted"
                 android:layout_width="wrap_content"
